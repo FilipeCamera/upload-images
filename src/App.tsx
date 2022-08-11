@@ -47,7 +47,7 @@ function App() {
             handleDrop={handleDrop}
           />
           <p className="card__or">OR</p>
-          <Button title="Choose a file" onFunction={(e: any) => {}} />
+          <Button title="Choose a file" onFunction={() => {}} />
         </Card>
         <Footer>
           <p>

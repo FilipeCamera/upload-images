@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { ButtonContainer } from "./styles";
 
 interface ButtonProps {
@@ -7,5 +7,21 @@ interface ButtonProps {
 }
 
 export default function Button({ title, onFunction }: ButtonProps) {
-  return <ButtonContainer onClick={onFunction}>{title}</ButtonContainer>;
+  const inputRef = useRef<any>();
+
+  const handleClick = () => {
+    inputRef.current.click();
+  };
+
+  return (
+    <>
+      <input
+        ref={inputRef}
+        type="file"
+        style={{ display: "none" }}
+        onChange={onFunction}
+      />
+      <ButtonContainer onClick={handleClick}>{title}</ButtonContainer>
+    </>
+  );
 }
