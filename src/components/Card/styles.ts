@@ -38,6 +38,26 @@ export const CardContainer = styled.div`
       color: #bdbdbd;
       padding: 24px 0;
     }
+
+    &__p-upload {
+      text-align: left;
+      font-size: 1.3rem;
+      font-weight: 500;
+      font-style: normal;
+      color: #4f4f4f;
+      width: 100%;
+      margin-bottom: 32px;
+    }
+
+    &__figure {
+      width: 100%;
+      margin: 25px 0;
+
+      img {
+        width: 100%;
+        border-radius: 12px;
+      }
+    }
   }
 
   @media screen and (max-width: 767.98px) {

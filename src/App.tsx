@@ -1,14 +1,24 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Background from "./components/Background";
-import Button from "./components/Button";
 import Card from "./components/Card";
-import Dropzone from "./components/Dropzone";
 import Footer from "./components/Footer";
+import Steps from "./components/Steps";
+import storage from "./config";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import GlobalStyle from "./styles";
 
 function App() {
   const [dragActive, setDragActive] = useState<boolean>(false);
+  const [state, setState] = useState<number>(0);
   const [upload, setUpload] = useState<any>();
+
+  useEffect(() => {
+    if (state === 1) {
+      setTimeout(() => setState(state + 1), 5000);
+    }
+  }, [state]);
+
+  useEffect(() => {});
 
   const handleDrag = useCallback((event: any) => {
     event.preventDefault();
@@ -25,13 +35,65 @@ function App() {
     setDragActive(false);
 
     if (event.dataTransfer.files && event.dataTransfer.files[0]) {
-      setUpload(event.dataTransfer.files);
-      handleUpload();
+      const storageRef = ref(
+        storage,
+        `/images/${Date.now().toString()}-${event.dataTransfer.files[0].name}`
+      );
+      const uploadTask = uploadBytesResumable(
+        storageRef,
+        event.dataTransfer.files[0]
+      );
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const loadingPercent =
+            Math.round(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+
+          console.log(loadingPercent);
+        },
+        (err) => {},
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((url) => {
+            setUpload(url);
+
+            setState(state + 1);
+          });
+        }
+      );
     }
   }, []);
 
-  const handleUpload = useCallback(() => {
-    console.log(upload);
+  const handleUpload = useCallback((event: any) => {
+    event.preventDefault();
+
+    const file = event.target.files[0];
+
+    if (file.lenght !== 0) {
+      const storageRef = ref(
+        storage,
+        `/images/${Date.now().toString()}-${file.name}`
+      );
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const loadingPercent =
+            Math.round(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+
+          console.log(loadingPercent);
+        },
+        (err) => {},
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((url) => {
+            setUpload(url);
+
+            setState(state + 1);
+          });
+        }
+      );
+    }
   }, []);
 
   return (
@@ -39,15 +101,15 @@ function App() {
       <GlobalStyle />
       <Background>
         <Card className="card">
-          <h1 className="card__title">Upload your image</h1>
-          <p className="card__subtitle">File should be jpeg, png...</p>
-          <Dropzone
+          <Steps
+            image={upload}
+            state={state}
+            onFunction={() => {}}
             dragActive={dragActive}
             handleDrag={handleDrag}
             handleDrop={handleDrop}
+            handleUpload={handleUpload}
           />
-          <p className="card__or">OR</p>
-          <Button title="Choose a file" onFunction={() => {}} />
         </Card>
         <Footer>
           <p>
